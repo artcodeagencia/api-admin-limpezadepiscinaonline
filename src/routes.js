@@ -12,6 +12,9 @@ const authMiddleware = require('./app/middleware/auth');
 
 // Definição Rotas
 routes.post('/auth', SessionControllerRoute.login);
+routes.post('/auth-hash', SessionControllerRoute.authHash);
+routes.post('/admin-forgot-password', SessionControllerRoute.adminForgotPassword);
+routes.post('/admin-redefine-password', SessionControllerRoute.adminRedefinePassword);
 routes.get('/auth-admin', SessionControllerRoute.get);
 
 routes.use(authMiddleware);
@@ -58,6 +61,7 @@ routes.get('/get-search-courses', OrdersControllerRoute.getSearchCourses);
 routes.get('/get-search-budgets', BudgetsControllerRoute.getSearchBudgets);
 routes.get('/get-search-budgets-courses', BudgetsControllerRoute.getSearchBudgetsCourses);
 routes.post('/delete-orders', OrdersControllerRoute.deleteOrders);
+routes.post('/delete-users', OrdersControllerRoute.deleteUsers);
 
 routes.get('/get-courses', CoursesControllerRoute.getCourses);
 routes.post('/update-courses', CoursesControllerRoute.updateCourses);

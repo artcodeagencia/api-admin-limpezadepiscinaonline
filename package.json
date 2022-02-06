@@ -21,7 +21,7 @@
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.2.5",
     "nodemailer": "^6.6.0",
-    "randomstring": "^1.1.5",
+    "randomstring": "^1.2.1",
     "sequelize": "^6.6.2",
     "supertest": "^6.1.3"
   },

@@ -1,5 +1,6 @@
 const { orcamento } = require('../models');
 const { clientes } = require('../models');
+const { usuarios } = require('../models');
 const { checkout } = require('../models');
 const { historicostatus } = require('../models');
 const { historicoorcamento } = require('../models');
@@ -109,7 +110,9 @@ function ibgeInfo(state){
 
 class FaturaSimples{
    async newOrder(order){
+
     let new_client_result;
+    // console.log(order);
     
     let user = await clientes.findOne({
       where: {
@@ -133,12 +136,17 @@ class FaturaSimples{
       let data;
 
       // data;
-      var date_actual = new Date();
-      // agendamento_data;
-      var date_schedule = new Date();
-      date_schedule.setDate(date_schedule.getDate() + parseInt(process.env.TRIAL_PERIOD));
-      // pos_month;
-      var date_billet = new Date();
+      var date_actual = new Date(order.agendamento_visita);
+      
+      // Data Agendamento 
+      var date_schedule_emission = new Date(order.agendamento_visita);
+      date_schedule_emission.setDate(date_schedule_emission.getDate() + parseInt(process.env.TRIAL_PERIOD));
+
+      var date_schedule = new Date(order.agendamento_visita);
+      date_schedule.setMonth(date_schedule.getMonth() + 1);
+
+      // Data Única 
+      var date_billet = new Date(order.agendamento_visita);
       date_billet.setDate(date_billet.getDate() + parseInt(process.env.DATE_BILLET));
 
 
@@ -236,7 +244,7 @@ class FaturaSimples{
    
       if(order.id_tipo_atendimento === 1){
         data = {
-          agendamento_data: dateFormat(date_schedule, "yyyy-mm-dd"),
+          agendamento_data: dateFormat(date_schedule_emission, "yyyy-mm-dd"),
           agendamento: 1,
           agendamento_repetir: 1,
           agendamento_frequencia: 1,
@@ -267,16 +275,17 @@ class FaturaSimples{
         
           if(order.id_tipo_atendimento === 1){
 
-              let date_month_update = new Date();
+              let date_month_update = new Date(order.agendamento_visita);
               date_month_update.setMonth(date_month_update.getMonth() + (index+1));
               data[`data_vencimento_${(index + 1)}`] = dateFormat(date_month_update, "yyyy-mm-dd");
               data[`valor_${(index + 1)}`] = (order.valor_total + order.taxa_adicional);
 
           } else {
             
-              let date_month_update = new Date();
+              let date_month_update = new Date(order.agendamento_visita);
               date_month_update.setMonth(date_month_update.getMonth() + index);
               date_month_update.setDate(date_month_update.getDate() + parseInt(process.env.DATE_BILLET));
+
               data[`data_vencimento_${(index + 1)}`] = dateFormat(date_month_update, "yyyy-mm-dd");
               data[`valor_${(index + 1)}`] = (order.valor_total / order.parcelamento);
 
@@ -301,6 +310,7 @@ class FaturaSimples{
       data.servico_total = servico_total;
       data.cliente = user.id_fatura_simples;
       data.meio_pagamento = ((parseInt(order.modo_pagamento) === 0) ? "Cartão de Crédito" : "Boleto Bradesco");
+      data.parcelas = order.parcelamento;
       data.email_enviar = 1;
       data.email = user.email;
       data.emissao_nfse = 2;
@@ -313,6 +323,8 @@ class FaturaSimples{
       
       /* Preparing to send */
     
+      // console.log(data);
+
       const data_string = qs.stringify(data);
   
       const resultFaturaSimples = await axios.post('https://qualytratus.faturasimples.com.br/api/venda/', data_string, {
@@ -790,6 +802,36 @@ class OrdersController {
     
     let error;
     if(orderDestroy) {
+      error = false;
+    } else {
+      error = true;
+    }
+    return res.status(200).json({ error });
+  }
+
+  async deleteUsers(req, res){
+    const data = req.body;
+
+    await usuarios.destroy({
+      where: {
+        id_cliente: data.id
+      }
+    });
+
+    await orcamento.destroy({
+      where: {
+        id_cliente: data.id
+      }
+    });
+
+    const clientDestroy = await clientes.destroy({
+      where: {
+        id: data.id
+      }
+    });
+    
+    let error;
+    if(clientDestroy) {
       error = false;
     } else {
       error = true;

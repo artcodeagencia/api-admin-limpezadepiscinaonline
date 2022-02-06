@@ -4,8 +4,10 @@ const jwt = require('jsonwebtoken');
 module.exports = (sequelize, DataTypes) => {
   const admin = sequelize.define('admin', {
     usuario: DataTypes.STRING,
+    email: DataTypes.STRING,
     senha: DataTypes.VIRTUAL,
     senha_hash: DataTypes.STRING,
+    forgot_password_hash: DataTypes.STRING,
   }, {
     hooks: {
       beforeSave: async (adminquery) => {
