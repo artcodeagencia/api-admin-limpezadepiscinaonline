@@ -14,7 +14,7 @@ var qs = require('qs');
 const dateFormat = require("dateformat");
 
 require('dotenv').config({
-  path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env'
+  path: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env'
 })
 
 function searchDatabase(data) {
